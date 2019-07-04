@@ -1,38 +1,31 @@
 """Create synthetic datasets for surrogate training."""
 # %%
-import pickle as pk
+
 from os import getcwd
 
 import numpy as np
 import pandas as pd
-from optproblems import wfg, cec2005, cec2007, dtlz, zdt
+from optproblems import wfg, dtlz, zdt
 from pyDOE import lhs
-from scipy.stats.distributions import norm
 
 mean = 0.5
 std_dev = 0.1
 noise_mean = 0
 noise_std = 0.05
 num_obj = 2
-num_var_zdt = {
-    "ZDT1": 30,
-    "ZDT2": 30,
-    "ZDT3": 30,
-    "ZDT4": 10,
-    "ZDT6": 10,
-}
+num_var_zdt = {"ZDT1": 30, "ZDT2": 30, "ZDT3": 30, "ZDT4": 10, "ZDT6": 10}
 
 
 problems = {
-    "WFG1": wfg.WFG1,
-    "WFG2": wfg.WFG2,
-    "WFG3": wfg.WFG3,
-    "WFG4": wfg.WFG4,
-    "WFG5": wfg.WFG5,
-    "WFG6": wfg.WFG6,
-    "WFG7": wfg.WFG7,
-    "WFG8": wfg.WFG8,
-    "WFG9": wfg.WFG9,
+    # "WFG1": wfg.WFG1,
+    # "WFG2": wfg.WFG2,
+    # "WFG3": wfg.WFG3,
+    # "WFG4": wfg.WFG4,
+    # "WFG5": wfg.WFG5,
+    # "WFG6": wfg.WFG6,
+    # "WFG7": wfg.WFG7,
+    # "WFG8": wfg.WFG8,
+    # "WFG9": wfg.WFG9,
     "ZDT1": zdt.ZDT1,
     "ZDT2": zdt.ZDT2,
     "ZDT3": zdt.ZDT3,
@@ -135,9 +128,9 @@ def generate_var_0_1(
         + "_"
         + distribution
     )
-    if distribution == "Uniform":
+    if distribution == "uniform":
         var = lhs(num_var, num_samples)
-    elif distribution == "Normal":
+    elif distribution == "normal":
         means = [mean] * num_var
         cov = np.eye(num_var) * np.square(std_dev)
         var = np.random.multivariate_normal(means, cov, num_samples)
@@ -151,7 +144,6 @@ def generate_var_0_1(
     var[var > 1] = 1
     var[var < 0] = 0
     return (var, filename)
-
 
 
 def generateDTLZ(
@@ -278,10 +270,10 @@ def generateZDT(
     save_folder : str
         Path to the folder to save csv files
     """
-    objective = problems[problemname](num_obj, num_var)
+    objective = problems[problemname]()
+    num_var = num_var_zdt[problemname]
     var_names = ["x{0}".format(x) for x in range(num_var)]
     obj_names = ["f1", "f2"]
-    num_var = num_var_zdt[problemname]
     var, filename = generate_var_0_1(
         problemname,
         num_var,
@@ -297,3 +289,49 @@ def generateZDT(
     filename = filename + ".csv"
     data.to_csv(filename, index=False)
     return
+
+
+def main():
+    """Automatically create datasets and save them as csv files in ./datasets_benchmark
+    """
+    folder = getcwd() + "/datasets_benchmark"
+    num_vars = [6, 10, 16, 20, 30]
+    num_samples = [
+        100,
+        150,
+        200,
+        250,
+        300,
+        350,
+        400,
+        500,
+        600,
+        700,
+        800,
+        900,
+        1000,
+        1200,
+        1500,
+        2000,
+    ]
+    distribution = ["uniform", "normal"]
+    missing_data = False
+    noise = False
+    for problem in problems:
+        print(problem)
+        for num_var in num_vars:
+            for samples in num_samples:
+                for dist in distribution:
+                    generatedata(
+                        problemname=problem,
+                        num_var=num_var,
+                        num_samples=samples,
+                        distribution=dist,
+                        noise=noise,
+                        missing_data=missing_data,
+                        save_folder=folder,
+                    )
+
+
+if __name__ == "__main__":
+    main()

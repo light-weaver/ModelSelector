@@ -15,6 +15,8 @@ optproblems = "^1.2"
 rpy2 = "^3.0"
 tzlocal = "^1.5"
 seaborn = "^0.9.0"
+diversipy = "^0.8.0"
+ipython = "^7.6"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^18.3-alpha.0",allows-prereleases = true}
