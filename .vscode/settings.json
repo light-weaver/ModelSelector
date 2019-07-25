@@ -1,6 +1,9 @@
 {
-    "python.pythonPath": "/home/bhupinder/.virtualenvs/ModelSelector/bin/python",
+    "python.pythonPath": "/home/rishi/.virtualenvs/ModelSelector/bin/python",
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "terminal.integrated.fontFamily": "Liberation Mono",
+    "python.formatting.provider": "black"
+
 }
