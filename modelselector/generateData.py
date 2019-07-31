@@ -1,12 +1,13 @@
 """Create synthetic datasets for surrogate training."""
 # %%
 
-from os import getcwd
+from os import mkdir, getcwd
 
 import numpy as np
 import pandas as pd
 from optproblems import wfg, dtlz, zdt
 from pyDOE import lhs
+from tqdm import tqdm
 
 mean = 0.5
 std_dev = 0.1
@@ -291,34 +292,44 @@ def generateZDT(
     return
 
 
-def main():
+def create_datasets(
+    folder: str = None,
+    num_vars: list = None,
+    num_samples: list = None,
+    distribution: list = None,
+    missing_data: bool = False,
+    noise: bool = False,
+):
     """Automatically create datasets and save them as csv files in ./datasets_benchmark
     """
-    folder = getcwd() + "/datasets_benchmark"
-    num_vars = [6, 10, 16, 20, 30]
-    num_samples = [
-        100,
-        150,
-        200,
-        250,
-        300,
-        350,
-        400,
-        500,
-        600,
-        700,
-        800,
-        900,
-        1000,
-        1200,
-        1500,
-        2000,
-    ]
-    distribution = ["uniform", "normal"]
-    missing_data = False
-    noise = False
-    for problem in problems:
-        print(problem)
+    if folder is None:
+        folder = "datasets_benchmark_train"
+    mkdir(folder)
+    folder = getcwd() + '/' + folder
+    if num_vars is None:
+        num_vars = [6, 10, 16, 20, 30]
+    if num_samples is None:
+        num_samples = [
+            100,
+            150,
+            200,
+            250,
+            300,
+            350,
+            400,
+            500,
+            600,
+            700,
+            800,
+            900,
+            1000,
+            1200,
+            1500,
+            2000,
+        ]
+    if distribution is None:
+        distribution = ["uniform", "normal"]
+    for problem in tqdm(problems):
         for num_var in num_vars:
             for samples in num_samples:
                 for dist in distribution:
@@ -334,10 +345,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
-
-
-def create_datasets():
-    """ Currently just a wrapper around main. To be used to make adjustments to data
-    later."""
-    main()
+    # Training files
+    # create_datasets()
+    # Testing files
+    create_datasets(
+        folder="datasets_benchmark_test", num_samples=[10000], distribution=["uniform"]
+    )
