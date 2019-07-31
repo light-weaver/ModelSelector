@@ -17,15 +17,15 @@ num_var_zdt = {"ZDT1": 30, "ZDT2": 30, "ZDT3": 30, "ZDT4": 10, "ZDT6": 10}
 
 
 problems = {
-    # "WFG1": wfg.WFG1,
-    # "WFG2": wfg.WFG2,
-    # "WFG3": wfg.WFG3,
-    # "WFG4": wfg.WFG4,
-    # "WFG5": wfg.WFG5,
-    # "WFG6": wfg.WFG6,
-    # "WFG7": wfg.WFG7,
-    # "WFG8": wfg.WFG8,
-    # "WFG9": wfg.WFG9,
+    "WFG1": wfg.WFG1,
+    "WFG2": wfg.WFG2,
+    "WFG3": wfg.WFG3,
+    "WFG4": wfg.WFG4,
+    "WFG5": wfg.WFG5,
+    "WFG6": wfg.WFG6,
+    "WFG7": wfg.WFG7,
+    "WFG8": wfg.WFG8,
+    "WFG9": wfg.WFG9,
     "ZDT1": zdt.ZDT1,
     "ZDT2": zdt.ZDT2,
     "ZDT3": zdt.ZDT3,
@@ -334,4 +334,10 @@ def main():
 
 
 if __name__ == "__main__":
+    main()
+
+
+def create_datasets():
+    """ Currently just a wrapper around main. To be used to make adjustments to data
+    later."""
     main()

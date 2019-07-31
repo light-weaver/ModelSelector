@@ -1,4 +1,4 @@
-#import pandas.rpy.common as com
+# import pandas.rpy.common as com
 from rpy2.robjects import numpy2ri, pandas2ri
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage as STAP
 
@@ -29,7 +29,7 @@ flacco_features = STAP(r_code, "test")
 
 
 def calculatefeatures(inputs, outputs) -> list:
-    """Calculates ELA features using the R Flacco package.
+    """Calculates ELA features for one dataset using the R Flacco package.
 
         Parameters
         ----------
