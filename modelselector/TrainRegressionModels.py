@@ -15,7 +15,10 @@ from tqdm import tqdm
 
 
 def trainregressionmodels(
-    training_data_folder: str = None, test_data_folder: str = None, models: dict = None
+    training_data_folder: str,
+    test_data_folder: str,
+    performance_output_folder: str = None,
+    models: dict = None,
 ):
     """Train regression models on the datasets found in the path given by *_data_folder.
     Saves R^2 values in csv file.
@@ -33,22 +36,24 @@ def trainregressionmodels(
         Should be in the format: {"<Model_name>": [model object, {parameters for fit}]}.
         <model object> is the class that has .fit and .predict methods.
     """
+    if performance_output_folder is None:
+        performance_output_folder = "./surrogate_performance"
     training_data_files = listdir(training_data_folder)
     test_data_files = listdir(test_data_folder)
     test_data_files = [file.split("/")[-1].split("_") for file in test_data_files]
-    test_data_files = pd.Dataframe(
+    test_data_files = pd.DataFrame(
         test_data_files, columns=["problem_name", "num_var", "num_samples", "dist"]
     )
     # DO some magic to get num_samples easily
     if models is None:
         models = {
             "svm_linear": [SVR, {"kernel": "linear"}],
-            "svm_rbf": [SVR, {}],
+            "svm_rbf": [SVR, {"gamma": "scale"}],
             "MLP": [MLPR, {}],
             "GPR_rbf": [GPR, {"kernel": kernels.RBF()}],
             "GPR_matern3/2": [GPR, {"kernel": kernels.Matern(nu=1.5)}],
             "GPR_matern5/2": [GPR, {"kernel": kernels.Matern(nu=2.5)}],
-            "GPR_ExpSinSq": [GPR, {"kernel": kernels.ExpSineSquared()}],
+            # "GPR_ExpSinSq": [GPR, {"kernel": kernels.ExpSineSquared()}],
             "DecisionTree": [DTR, {}],
             "RandomForest_10": [RFR, {"n_estimators": 10}],
             "RandomForest_100": [RFR, {"n_estimators": 100}],
@@ -74,10 +79,10 @@ def trainregressionmodels(
         problem_name = filename[0]
         num_var = filename[1]
         test_data_file = test_data_files[
-            (test_data_files["problem_name" == problem_name])
+            (test_data_files["problem_name"] == problem_name)
             & (test_data_files["num_var"] == num_var)
         ].values
-        test_data_file = '_'.join(test_data_file)
+        test_data_file = "_".join(test_data_file[0].tolist())
         test_data = pd.read_csv(test_data_folder + test_data_file)
         columns = training_data.columns
         x_columns = [column for column in columns if "x" in column]
@@ -94,5 +99,6 @@ def trainregressionmodels(
             y_pred = model.predict(X_test)
             performance["time"].at[file, model_name] = time_delta
             performance["R^2"].at[file, model_name] = r2_score(y_test, y_pred)
-            performance["mse"].at[file, model_name] = mean_squared_error(y_test, y_pred)
-    print("Done!")
+            performance["MSE"].at[file, model_name] = mean_squared_error(y_test, y_pred)
+    for metric, performance_data in performance.items():
+        performance_data.to_csv(performance_output_folder + "/" + metric + ".csv")
