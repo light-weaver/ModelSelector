@@ -18,6 +18,7 @@ def trainregressionmodels(
     training_data_folder: str,
     test_data_folder: str,
     performance_output_folder: str = None,
+    name: str = None,
     models: dict = None,
 ):
     """Train regression models on the datasets found in the path given by *_data_folder.
@@ -31,6 +32,8 @@ def trainregressionmodels(
         Path to the datasets to be used for training, by default None
     test_data_folder : str, optional
         Path to the datasets to be used for testing, by default None
+    name : str
+        Name of the output files
     models : dict, optional
         Dictionary of sklearn models, by default None.
         Should be in the format: {"<Model_name>": [model object, {parameters for fit}]}.
@@ -101,4 +104,6 @@ def trainregressionmodels(
             performance["R^2"].at[file, model_name] = r2_score(y_test, y_pred)
             performance["MSE"].at[file, model_name] = mean_squared_error(y_test, y_pred)
     for metric, performance_data in performance.items():
-        performance_data.to_csv(performance_output_folder + "/" + metric + ".csv")
+        performance_data.to_csv(
+            performance_output_folder + "/" + name + metric + ".csv"
+        )

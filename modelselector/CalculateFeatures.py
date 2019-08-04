@@ -51,25 +51,27 @@ def calculatefeatures(inputs, outputs) -> list:
     return features
 
 
-def CalculateFeaturesForAllData(inputfolder: str = None):
+def CalculateFeaturesForAllData(inputfolder: str, name: str):
     """Calculate features for all csv files (objective name = 'f2') in inputfolder.
 
     Parameters
     ----------
-    inputfolder : str, optional
-        Path to input folder, by default None
+    inputfolder : str
+        Path to input folder
+    name :str
+        Name of the output file, located at ./features/name.csv
     """
     data_files = listdir(inputfolder)
     features_all = pd.DataFrame()
     for file in tqdm(data_files):
         data = pd.read_csv(inputfolder + file)
-        X = [x for x in data.columns if 'x' in x] 
-        y = ['f2']
+        X = [x for x in data.columns if "x" in x]
+        y = [y for y in data.columns if "f" in y][-1]
         try:
-            features_single = calculatefeatures(data[X], data[y])
-            features_single.rename({'1': file}, inplace=True)
+            features_single = calculatefeatures(data[X], data[[y]])
+            features_single.rename({"1": file}, inplace=True)
             features_all = features_all.append(features_single)
         except RRuntimeError as exception:
             print(exception)
-            print("FILE: "+file)
-    features_all.to_csv('features.csv')
+            print("FILE: " + file)
+    features_all.to_csv("./features/" + name + ".csv")

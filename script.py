@@ -1,5 +1,6 @@
 # %%
 from modelselector.CalculateFeatures import CalculateFeaturesForAllData
+
 # from modelselector.generateData import create_datasets
 # import pandas as pd
 
@@ -12,8 +13,12 @@ from modelselector.CalculateFeatures import CalculateFeaturesForAllData
 """from modelselector.TrainRegressionModels import trainregressionmodels as trm
 
 trm(
-    training_data_folder="./datasets_benchmark_train/",
-    test_data_folder="./datasets_benchmark_test/",
+    training_data_folder="./datasets/engineering_train/",
+    test_data_folder="./datasets/engineering_test/",
+    performance_output_folder="./surrogate_performance/",
+    name="engineering"
 )"""
 
-CalculateFeaturesForAllData(inputfolder='./datasets_benchmark_train/')
+CalculateFeaturesForAllData(
+    inputfolder="./datasets/engineering_train/", name="engineering"
+)
