@@ -1,4 +1,4 @@
-#%%
+# %%
 import numpy as np
 import pandas as pd
 
@@ -155,14 +155,14 @@ def speed_reducer(num_samples: int = 100) -> list:
 
 def welded_beam_design(num_samples: int = 100):
     """The Welded beam design
-    
+
     AS found in An improved harmony search algo...
-    
+
     Parameters
     ----------
     num_samples : int, optional
         Number of samples (the default is 100, which generates 100 datapoints)
-    
+
     """
     x = np.random.rand(num_samples, 4)
     x[:, 0] = x[:, 0] * (0.125)
@@ -198,7 +198,7 @@ def unconstrained_f(num_samples: int = 100):
     return (x, np.asarray([f2]).T)
 
 
-#%%
+# %%
 def main(num_samples_options: list = None, name: str = None):
     # decision_vars = np.random.randint(12, 61, (100, 4))
     """decision_vars = np.hstack(
