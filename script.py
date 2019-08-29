@@ -22,9 +22,9 @@ trm(
 from modelselector.TrainRegressionModels import trainregressionmodelsCV as trmCV
 
 trmCV(
-    training_data_folder="./datasets/engineering_train/",
+    training_data_folder="./datasets/datasets_benchmark_train/",
     performance_output_folder="./surrogate_performance/",
-    name="engineering"
+    name="benchmark"
 )
 
 """CalculateFeaturesForAllData(

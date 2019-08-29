@@ -178,7 +178,7 @@ def trainregressionmodelsCV(
         for model_name, (model_type, model_parameters) in models.items():
             model = model_type(**model_parameters)
             score = cross_val_score(
-                model, X_train, y_train, scoring=scorer, n_jobs=-1, cv=num_splits
+                model, X_train, y_train, scoring=scorer, cv=num_splits
             )
             CV_score_mean.at[file, model_name] = score.mean()
             CV_score_max.at[file, model_name] = score.max()
