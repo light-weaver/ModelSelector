@@ -1,7 +1,7 @@
 # Project specific
 
 datasets*/
-
+results/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
