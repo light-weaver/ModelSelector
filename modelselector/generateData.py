@@ -178,15 +178,18 @@ def generateDTLZ(
     objective = problems[problemname](num_obj, num_var)
     var_names = ["x{0}".format(x) for x in range(num_var)]
     obj_names = ["f1", "f2"]
-    var, filename = generate_var_0_1(
-        problemname,
-        num_var,
-        num_samples,
-        distribution,
-        noise,
-        missing_data,
-        save_folder,
-    )
+    if distribution in ["uniform", "normal"]:
+        var, filename = generate_var_0_1(
+            problemname,
+            num_var,
+            num_samples,
+            distribution,
+            noise,
+            missing_data,
+            save_folder,
+        )
+    elif distribution == "optimal":
+        var = np.zeros((num_samples, num_var))
     obj = [objective(x) for x in var]
     data = np.hstack((var, obj))
     data = pd.DataFrame(data, columns=var_names + obj_names)
@@ -275,15 +278,31 @@ def generateZDT(
     num_var = num_var_zdt[problemname]
     var_names = ["x{0}".format(x) for x in range(num_var)]
     obj_names = ["f1", "f2"]
-    var, filename = generate_var_0_1(
-        problemname,
-        num_var,
-        num_samples,
-        distribution,
-        noise,
-        missing_data,
-        save_folder,
-    )
+    if distribution in ["uniform", "normal"]:
+        var, filename = generate_var_0_1(
+            problemname,
+            num_var,
+            num_samples,
+            distribution,
+            noise,
+            missing_data,
+            save_folder,
+        )
+    elif distribution == "optimal":
+        var = np.zeros((num_samples, num_var - 1))
+        var_x1 = np.linspace(0, 1, num_samples)
+        var = np.hstack((var_x1, var))
+        filename = (
+            save_folder
+            + "/"
+            + problemname
+            + "_"
+            + str(num_var)
+            + "_"
+            + str(num_samples)
+            + "_"
+            + distribution
+        )
     obj = [objective(x) for x in var]
     data = np.hstack((var, obj))
     data = pd.DataFrame(data, columns=var_names + obj_names)
@@ -305,7 +324,7 @@ def create_datasets(
     if folder is None:
         folder = "datasets_benchmark_train"
     mkdir(folder)
-    folder = getcwd() + '/' + folder
+    folder = getcwd() + "/" + folder
     if num_vars is None:
         num_vars = [6, 10, 16, 20, 30]
     if num_samples is None:
