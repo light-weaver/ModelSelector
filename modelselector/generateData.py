@@ -17,6 +17,21 @@ num_obj = 2
 num_var_zdt = {"ZDT1": 30, "ZDT2": 30, "ZDT3": 30, "ZDT4": 10, "ZDT6": 10}
 
 
+class DTLZ6(dtlz.DTLZ5):
+    """DTLZ6 only differs from DTLZ5 in the g function.
+    This DTLZ6 function is the "corrected version where x_i are shifted by 0.5.
+    This makes it so that all the dtlz problems have the pareto front at x_i=0.5"""
+
+    def g(self, phenome):
+        """The g function of DTLZ6."""
+        g = 0.0
+        n = self.num_variables
+        k = n - self.num_objectives + 1
+        for i in range(n - k + 1, n + 1):
+            g += pow(phenome[i - 1] - 0.5, 0.1)
+        return g
+
+
 problems = {
     "WFG1": wfg.WFG1,
     "WFG2": wfg.WFG2,
@@ -37,7 +52,7 @@ problems = {
     "DTLZ3": dtlz.DTLZ3,
     "DTLZ4": dtlz.DTLZ4,
     "DTLZ5": dtlz.DTLZ5,
-    "DTLZ6": dtlz.DTLZ6,
+    "DTLZ6": DTLZ6,
     "DTLZ7": dtlz.DTLZ7,
 }
 
@@ -189,7 +204,20 @@ def generateDTLZ(
             save_folder,
         )
     elif distribution == "optimal":
-        var = np.zeros((num_samples, num_var))
+        x_first_m_1 = np.random.random((num_samples, num_obj - 1))
+        x_last_k = np.zeros((num_samples, num_var - num_obj + 1)) + 0.5
+        var = np.hstack((x_first_m_1, x_last_k))
+        filename = (
+            save_folder
+            + "/"
+            + problemname
+            + "_"
+            + str(num_var)
+            + "_"
+            + str(num_samples)
+            + "_"
+            + distribution
+        )
     obj = [objective(x) for x in var]
     data = np.hstack((var, obj))
     data = pd.DataFrame(data, columns=var_names + obj_names)
@@ -229,15 +257,30 @@ def generateWFG(
     objective = problems[problemname](num_obj, num_var, k=4)
     var_names = ["x{0}".format(x) for x in range(num_var)]
     obj_names = ["f1", "f2"]
-    var, filename = generate_var_0_1(
-        problemname,
-        num_var,
-        num_samples,
-        distribution,
-        noise,
-        missing_data,
-        save_folder,
-    )
+    if distribution in ["uniform", "normal"]:
+        var, filename = generate_var_0_1(
+            problemname,
+            num_var,
+            num_samples,
+            distribution,
+            noise,
+            missing_data,
+            save_folder,
+        )
+    elif distribution == "optimal":
+        solns = objective.get_optimal_solutions(max_number=1000)
+        var = np.asarray([soln.phenome for soln in solns])
+        filename = (
+            save_folder
+            + "/"
+            + problemname
+            + "_"
+            + str(num_var)
+            + "_"
+            + str(num_samples)
+            + "_"
+            + distribution
+        )
     obj = [objective(x) for x in var]
     data = np.hstack((var, obj))
     data = pd.DataFrame(data, columns=var_names + obj_names)
@@ -290,7 +333,7 @@ def generateZDT(
         )
     elif distribution == "optimal":
         var = np.zeros((num_samples, num_var - 1))
-        var_x1 = np.linspace(0, 1, num_samples)
+        var_x1 = np.linspace(0, 1, num_samples).reshape(-1, 1)
         var = np.hstack((var_x1, var))
         filename = (
             save_folder

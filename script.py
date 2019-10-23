@@ -1,24 +1,21 @@
 # %%
-# from modelselector.CalculateFeatures import CalculateFeaturesForAllData
-
-# from modelselector.generateData import create_datasets
-# import pandas as pd
+from modelselector.generateData import create_datasets
 
 
-# %%
-# create_datasets()
+create_datasets(folder="./optimalsets/", distribution=["optimal"], num_samples=[10000])
 
 
 # %%
-"""from modelselector.TrainRegressionModels import trainregressionmodels as trm
+from modelselector.TrainRegressionModels import trainregressionmodels as trm
 
 trm(
     training_data_folder="./datasets/engineering_train/",
     test_data_folder="./datasets/engineering_test/",
     performance_output_folder="./surrogate_performance/",
     name="engineering"
-)"""
+)
 
+# %%
 from modelselector.TrainRegressionModels import trainregressionmodelsCV as trmCV
 
 trmCV(
