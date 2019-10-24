@@ -18,6 +18,7 @@ from tqdm import tqdm
 def trainregressionmodels(
     training_data_folder: str,
     test_data_folder: str,
+    optimal_data_folder: str = None,
     performance_output_folder: str = None,
     name: str = None,
     models: dict = None,
@@ -41,13 +42,22 @@ def trainregressionmodels(
         <model object> is the class that has .fit and .predict methods.
     """
     if performance_output_folder is None:
-        performance_output_folder = "./surrogate_performance"
+        performance_output_folder = "./"
     training_data_files = listdir(training_data_folder)
     test_data_files = listdir(test_data_folder)
     test_data_files = [file.split("/")[-1].split("_") for file in test_data_files]
     test_data_files = pd.DataFrame(
         test_data_files, columns=["problem_name", "num_var", "num_samples", "dist"]
     )
+    if optimal_data_folder is not None:
+        optimal_data_files = listdir(optimal_data_folder)
+        optimal_data_files = [
+            file.split("/")[-1].split("_") for file in optimal_data_files
+        ]
+        optimal_data_files = pd.DataFrame(
+            optimal_data_files,
+            columns=["problem_name", "num_var", "num_samples", "dist"],
+        )
     # DO some magic to get num_samples easily
     if models is None:
         models = {
@@ -69,12 +79,19 @@ def trainregressionmodels(
     metrics = {"R^2": r2_score, "MSE": mean_squared_error, "time": []}
     model_types = models.keys()
     metrics_types = metrics.keys()
-    performance = {
+    performance_on_test = {
         metric: pd.DataFrame(
             columns=model_types, index=training_data_files, dtype=float
         )
         for metric in metrics_types
     }
+    if optimal_data_folder is not None:
+        performance_on_optimal = {
+            metric: pd.DataFrame(
+                columns=model_types, index=training_data_files, dtype=float
+            )
+            for metric in metrics_types
+        }
     # oldfile = ""
     for file in tqdm(training_data_files):
         # use the magic above to get validation data efficiently
@@ -95,19 +112,46 @@ def trainregressionmodels(
         y_train = training_data[y_columns[-1]].values
         X_test = test_data[x_columns].values
         y_test = test_data[y_columns[-1]].values
+        if optimal_data_folder is not None:
+            optimal_data_file = optimal_data_files[
+                (optimal_data_files["problem_name"] == problem_name)
+                & (optimal_data_files["num_var"] == num_var)
+            ].values
+            optimal_data_file = "_".join(optimal_data_file[0].tolist())
+            optimal_data = pd.read_csv(optimal_data_folder + optimal_data_file)
+            X_optimal = optimal_data[x_columns].values
+            y_optimal = optimal_data[y_columns[-1]].values
         for model_name, (model_type, model_parameters) in models.items():
             model = model_type(**model_parameters)
             time_init = time()
             model.fit(X_train, y_train)
             time_delta = time() - time_init
-            y_pred = model.predict(X_test)
-            performance["time"].at[file, model_name] = time_delta
-            performance["R^2"].at[file, model_name] = r2_score(y_test, y_pred)
-            performance["MSE"].at[file, model_name] = mean_squared_error(y_test, y_pred)
-    for metric, performance_data in performance.items():
+            y_pred_test = model.predict(X_test)
+            y_pred_optimal = model.predict(X_optimal)
+            performance_on_test["time"].at[file, model_name] = time_delta
+            performance_on_test["R^2"].at[file, model_name] = r2_score(
+                y_test, y_pred_test
+            )
+            performance_on_test["MSE"].at[file, model_name] = mean_squared_error(
+                y_test, y_pred_test
+            )
+            if optimal_data_folder is not None:
+                performance_on_optimal["time"].at[file, model_name] = time_delta
+                performance_on_optimal["R^2"].at[file, model_name] = r2_score(
+                    y_optimal, y_pred_optimal
+                )
+                performance_on_optimal["MSE"].at[file, model_name] = mean_squared_error(
+                    y_optimal, y_pred_optimal
+                )
+    for metric, performance_data in performance_on_test.items():
         performance_data.to_csv(
-            performance_output_folder + "/" + name + metric + ".csv"
+            performance_output_folder + "/" + name + "_test_" + metric + ".csv"
         )
+    if optimal_data_folder is not None:
+        for metric, performance_data in performance_on_optimal.items():
+            performance_data.to_csv(
+                performance_output_folder + "/" + name + "_optimal_" + metric + ".csv"
+            )
 
 
 def trainregressionmodelsCV(
