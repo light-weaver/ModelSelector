@@ -2,7 +2,7 @@
 from rpy2.robjects import numpy2ri, pandas2ri
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage as STAP
 from rpy2.rinterface_lib.embedded import RRuntimeError
-from os import listdir
+from os import listdir, path, mkdir
 import pandas as pd
 from tqdm import tqdm
 
@@ -62,6 +62,9 @@ def CalculateFeaturesForAllData(inputfolder: str, name: str):
         Name of the output file, located at ./features/name.csv
     """
     data_files = listdir(inputfolder)
+    output_dir = "./features/"
+    if not path.exists(output_dir):
+        mkdir(output_dir)
     features_all = pd.DataFrame()
     for file in tqdm(data_files):
         data = pd.read_csv(inputfolder + file)
@@ -74,4 +77,4 @@ def CalculateFeaturesForAllData(inputfolder: str, name: str):
         except RRuntimeError as exception:
             print(exception)
             print("FILE: " + file)
-    features_all.to_csv("./features/" + name + ".csv")
+    features_all.to_csv(output_dir + name + ".csv")

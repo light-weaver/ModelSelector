@@ -1,4 +1,4 @@
-from os import listdir
+import os
 from time import time
 
 import pandas as pd
@@ -42,15 +42,17 @@ def trainregressionmodels(
         <model object> is the class that has .fit and .predict methods.
     """
     if performance_output_folder is None:
-        performance_output_folder = "./"
-    training_data_files = listdir(training_data_folder)
-    test_data_files = listdir(test_data_folder)
+        performance_output_folder = "./surrogate_performance/"
+    if not os.path.exists(performance_output_folder):
+        os.mkdir(performance_output_folder)
+    training_data_files = os.listdir(training_data_folder)
+    test_data_files = os.listdir(test_data_folder)
     test_data_files = [file.split("/")[-1].split("_") for file in test_data_files]
     test_data_files = pd.DataFrame(
         test_data_files, columns=["problem_name", "num_var", "num_samples", "dist"]
     )
     if optimal_data_folder is not None:
-        optimal_data_files = listdir(optimal_data_folder)
+        optimal_data_files = os.listdir(optimal_data_folder)
         optimal_data_files = [
             file.split("/")[-1].split("_") for file in optimal_data_files
         ]
@@ -127,7 +129,8 @@ def trainregressionmodels(
             model.fit(X_train, y_train)
             time_delta = time() - time_init
             y_pred_test = model.predict(X_test)
-            y_pred_optimal = model.predict(X_optimal)
+            if optimal_data_folder is not None:
+                y_pred_optimal = model.predict(X_optimal)
             performance_on_test["time"].at[file, model_name] = time_delta
             performance_on_test["R^2"].at[file, model_name] = r2_score(
                 y_test, y_pred_test
@@ -184,7 +187,9 @@ def trainregressionmodelsCV(
     """
     if performance_output_folder is None:
         performance_output_folder = "./surrogate_performance"
-    training_data_files = listdir(training_data_folder)
+    if not os.path.exists(performance_output_folder):
+        os.mkdir(performance_output_folder)
+    training_data_files = os.listdir(training_data_folder)
     if models is None:
         models = {
             "svm_linear": [SVR, {"kernel": "linear"}],
